@@ -1,3 +1,33 @@
-git add codemagic.yaml
-git commit -m 'Add first workflow'
-git push
+
+workflows:
+  sevilla-fc-ios:
+    name: Sevilla FC para iPhone
+    max_build_duration: 60
+    instance_type: mac_mini_m2
+
+    environment:
+      xcode: latest
+      vars:
+        XCODE_PROJECT: "SevillaFC.xcodeproj"
+        XCODE_SCHEME: "SevillaFC"
+
+    scripts:
+      - name: Comprobar proyecto de Xcode
+        script: |
+          xcodebuild -list \
+            -project "$XCODE_PROJECT"
+
+      - name: Compilar aplicación iOS
+        script: |
+          xcodebuild \
+            -project "$XCODE_PROJECT" \
+            -scheme "$XCODE_SCHEME" \
+            -configuration Debug \
+            -sdk iphonesimulator \
+            -derivedDataPath build \
+            CODE_SIGNING_ALLOWED=NO \
+            build
+
+    artifacts:
+      - build/Build/Products/Debug-iphonesimulator/*.app
+      - /tmp/xcodebuild_logs/*.log
